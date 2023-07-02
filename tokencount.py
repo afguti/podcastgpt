@@ -1,7 +1,7 @@
 import tiktoken
 # If tiktoken not installed. Install with pip install --upgrade tiktoken
 
-#source: https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
+# Source: https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
 
 code = "cl100k_base"
 
@@ -15,7 +15,5 @@ def num_tokens_from_string(string: str, encoding_name: str) -> int:
 
 def counter(texto: str, model: str):
     #here we define the model
-    #encoding = tiktoken.encoding_for_model(model)
-    #encoding.encode(texto)
     result = num_tokens_from_string(texto, code)
     return result

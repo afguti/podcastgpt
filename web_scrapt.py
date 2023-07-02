@@ -1,12 +1,10 @@
 from bs4 import BeautifulSoup
 import requests
-#import nltk
-#nltk.download("punkt")
 from tokencount import counter
 
 import sys
 import openai
-import tiktoken
+#import tiktoken
 
 import os
 from dotenv import load_dotenv, find_dotenv
@@ -35,6 +33,7 @@ def get_completion_and_token_count(messages, #Here I can count the number of tok
 
     return content, token_dict
 
+#I use this function the extract information from websites
 def parser(url):
     response = requests.get(url)
     html_content = response.content
@@ -52,13 +51,9 @@ def parser(url):
 
 def curate(url, topic, intro):
     tokens, entra = parser(url)
-    #return f"{entra}"
     if tokens > 2500:
         response = f"CONTENT HAS {tokens}. THEY ARE TOO MANY!"
     else:
-        #text = f"""Is this content relevant to {topic}? If it is, provide a summary of about 100 words {entra}"""
-        #text = f"""Take the main ideas from the text and write a segment for a podcast of about 100 words. Mention the website {url} in a concise and reader-friendly way at the beginning of the segment, and refer to it as the source of the information that follows. This is not the fist segment of the episode. The information is: {entra}"""
-        #text = f"""Take the text in backticks and write a segment to be included in the middle of a podcast script. The segment has to have around 200 words. ```{entra}```"""
         text = f"""Write a script for an episode of a podcast named Your Wellness Journey. The host's name is Veronica, and there are no guests in the podcast. The topic of the episode is {topic}.
 
 Introduction:
@@ -84,24 +79,13 @@ Avoid using any sentence that implies welcoming the listener back or expressing 
         messages = [
             {'role': 'system',
              'content': "You are a content curation assistant."},
-             #'content': "You are a podcast script writer"},
             {'role': 'user', 'content': text},
         ]
         response, token_dict = get_completion_and_token_count(messages, temperature=0)
-        #text = f"""write a small segment for a podcast from text. The segment is about 100 words. text: {response}"""
-        #messages = [
-        #    {'role': 'system',
-        #     #'content': "You are a content curation assistant."},
-        #     'content': "You are a popular podcaster."},
-        #    {'role': 'user', 'content': text},
-        #]
-        #response, token_dict = get_completion_and_token_count(messages, temperature=0)
 
     return response
 
-
 def main():
-    #parser(url)
     curate(url, topic)
 
 if __name__ == "__main__":

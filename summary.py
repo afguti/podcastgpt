@@ -3,7 +3,7 @@ from tokencount import counter
 
 import sys
 import openai
-import tiktoken
+#import tiktoken
 
 import os
 from dotenv import load_dotenv, find_dotenv
@@ -11,7 +11,7 @@ _ = load_dotenv(find_dotenv())
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 def get_completion_and_token_count(messages, #Here I can count the number of tokens
-                                   model="gpt-3.5-turbo-16k", 
+                                   model="gpt-3.5-turbo-16k", #Here I am using the 16k model to summarize the 3 parts written so far.
                                    temperature=0, 
                                    max_tokens=10000):
     

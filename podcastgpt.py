@@ -13,27 +13,6 @@ from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv())
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
-def get_completion(prompt, model="gpt-3.5-turbo"):
-    messages = [{"role": "user", "content": prompt}]
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0, # this is the degree of randomness of the model's output
-    )
-    return response.choices[0].message["content"]
-
-def get_completion_from_messages(messages, #Using this function I can setup the max number of tokens
-                                 model="gpt-3.5-turbo", 
-                                 temperature=0, 
-                                 max_tokens=1000):
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=temperature, # this is the degree of randomness of the model's output
-        max_tokens=max_tokens, # the maximum number of tokens the model can ouptut 
-    )
-    return response.choices[0].message["content"]
-
 def get_completion_and_token_count(messages, #Here I can count the number of tokens
                                    model="gpt-3.5-turbo-0613", 
                                    temperature=0, 
@@ -79,6 +58,7 @@ def remove_text(text,n: int,m: int):
     
     return text
 
+#Create the file where the output is saved
 def save_output(filename: str, texto: str):
     directory = './'
 
@@ -94,7 +74,7 @@ def save_output(filename: str, texto: str):
         file.write("\n"+texto)
     return f"Content saved to {file_path}."
 
-
+#It returns Empty when no argument is given to podcastgpt.py
 def default():
 	print("Empty!")
 
@@ -120,17 +100,13 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	] 
 	response, token_dict = get_completion_and_token_count(messages, temperature=0)
 	
-	#prompt = f"""Execute the prompt delimited by the backticks. ```{text}```"""
-	#response = get_completion(prompt)
 	save_output("tocompare", response) #for test purpose
 	response = remove_text(response,0,2)  #Part1
-	#print(response)  # The output
-	#print(token_dict)  # Print the number of tokens used
 	save_output("wellness3", response)
 	
     #Section 2 picks up any website related to the topic
-	#url = "https://www.verywellmind.com/self-care-strategies-overall-stress-reduction-3144729"
-	url = "https://www.goalcast.com/wellness/"
+	#url = "https://www.verywellmind.com/self-care-strategies-overall-stress-reduction-3144729" #URL for topic: self-care
+	url = "https://www.goalcast.com/wellness/" #URL for the concept of wellness
 	intro = "Now in this section of the podcast we will review information we found in a web site."
 	part2 = curate(url, entra, intro)
 	save_output("tocompare", part2) #for test purpose
@@ -142,8 +118,8 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	save_output("wellness3", part2)
 
     #Section 3 will pick up a news article
-	#url = "https://www.forbes.com/sites/kathymillerperkins/2023/06/27/radical-self-care-how-to-redefine-boundaries-between-career-and-life/?sh=23e2f83d4dd6"
-	url = "https://www.bbc.co.uk/programmes/articles/558FD1c2hXHCh1wJfN6lkKS/how-wellness-became-big-business"
+	#url = "https://www.forbes.com/sites/kathymillerperkins/2023/06/27/radical-self-care-how-to-redefine-boundaries-between-career-and-life/?sh=23e2f83d4dd6" #URL for topic: self-care in the news
+	url = "https://www.bbc.co.uk/programmes/articles/558FD1c2hXHCh1wJfN6lkKS/how-wellness-became-big-business" #URL for the concept of wellness in the news
 	intro1 = f"Now in this section of the podcast we will review the news about {entra}"
 	part3 = curate(url, entra, intro1)
 	save_output("tocompare", part3) #for test purpose
