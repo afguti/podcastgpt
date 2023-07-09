@@ -105,8 +105,8 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	save_output("wellness3", response)
 	
     #Section 2 picks up any website related to the topic
-	#url = "https://www.verywellmind.com/self-care-strategies-overall-stress-reduction-3144729" #URL for topic: self-care
-	url = "https://www.goalcast.com/wellness/" #URL for the concept of wellness
+	url = "https://www.verywellmind.com/self-care-strategies-overall-stress-reduction-3144729" #URL for topic: self-care
+	#url = "https://www.goalcast.com/wellness/" #URL for the concept of wellness
 	intro = "Now in this section of the podcast we will review information we found in a web site."
 	part2 = curate(url, entra, intro)
 	save_output("tocompare", part2) #for test purpose
@@ -118,8 +118,8 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	save_output("wellness3", part2)
 
     #Section 3 will pick up a news article
-	#url = "https://www.forbes.com/sites/kathymillerperkins/2023/06/27/radical-self-care-how-to-redefine-boundaries-between-career-and-life/?sh=23e2f83d4dd6" #URL for topic: self-care in the news
-	url = "https://www.bbc.co.uk/programmes/articles/558FD1c2hXHCh1wJfN6lkKS/how-wellness-became-big-business" #URL for the concept of wellness in the news
+	url = "https://www.forbes.com/sites/kathymillerperkins/2023/06/27/radical-self-care-how-to-redefine-boundaries-between-career-and-life/?sh=23e2f83d4dd6" #URL for topic: self-care in the news
+	#url = "https://www.bbc.co.uk/programmes/articles/558FD1c2hXHCh1wJfN6lkKS/how-wellness-became-big-business" #URL for the concept of wellness in the news
 	intro1 = f"Now in this section of the podcast we will review the news about {entra}"
 	part3 = curate(url, entra, intro1)
 	save_output("tocompare", part3) #for test purpose
@@ -134,7 +134,7 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	path = "./wellness3"
 	with open(path, 'r') as file:
 	    content = file.read()
-	part4 = outtro(content, "self-care") #here we need to input the topic of the next episode
+	part4 = outtro(content, "Mindfulness") #here we need to input the topic of the next episode
 	save_output("tocompare", part4) #for text purpose
 	part4 = remove_text(part4,0,0)    
 	save_output("wellness3", part4)
