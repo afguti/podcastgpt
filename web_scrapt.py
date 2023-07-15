@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
+from requests.exceptions import ConnectTimeout, ConnectionError, ReadTimeout
 from tokencount import counter
 
 import sys
@@ -35,7 +36,17 @@ def get_completion_and_token_count(messages, #Here I can count the number of tok
 
 #I use this function the extract information from websites
 def parser(url):
-    response = requests.get(url)
+    try:
+        response = requests.get(url, timeout=3)
+    except ConnectTimeout:
+        print("TIMEOUT FOR: "+url)
+        response = requests.get('http://www.google.com', timeout=3)
+    except ConnectionError:
+        print("CONNECTION ERROR FOR: "+url)
+        response = requests.get('http://www.google.com', timeout=3)
+    except ReadTimeout:
+        print("READ TIMEOUT FOR: "+url)
+        response = requests.get('http://www.google.com', timeout=3)
     html_content = response.content
     soup = BeautifulSoup(html_content, "html.parser")
     text = soup.get_text()
