@@ -39,6 +39,29 @@ The scripts rely on the following dependencies:
 
 Please refer to the `requirements.txt` file for the specific versions of the dependencies used in this project.
 
+## Current challenges and goals
+1. We found that the urls that are selected contain very little reading material which reflect in poor content and short episode. For now, we might need a human to revise the URL before it is used.
+
+2. We have to keep looking for more realistic voice and audio.
+
+3. The content has to last for more than an hour.
+
+4. The podcast has to have a host and a guest.
+
+5. Automate tasks that currently require human intervention.
+
+6. automate audio upload.
+
+7. keep track of visited websites, to avoid repetition.
+
+8. keep track of topics discussed, to avoid repetition.
+
+9. Automate the creation of a short description of episode of around 100 words.
+
+10. Automate image creation.
+
+11. Incorporate LangChain and agents for further automation.
+
 ## Example Workflow
 Here is a visualization of the workflow:
 
