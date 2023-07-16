@@ -111,6 +111,7 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	if len(url_string) == 0:
 	    sys.exit("SOMETHING WENT WRONG WITH THE SEARCH FOR TEXT")
 	url = url_string[0]['href']
+	print("Section 2 web article: "+url)
 	intro = "Now in this section of the podcast we will review information we found in a web site."
 	part2 = curate(url, entra, intro)
 	save_output("tocompare", part2) #for test purpose
@@ -126,6 +127,7 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	if len(url_string) == 0:
 	    sys.exit("SOMETHING WENT WRONG WITH THE SEARCH FOR NEWS")
 	url = url_string[0]['url']
+	print("Section 3 news article: "+url)
 	intro1 = f"Now in this section of the podcast we will review the news about {entra}"
 	part3 = curate(url, entra, intro1)
 	save_output("tocompare", part3) #for test purpose
