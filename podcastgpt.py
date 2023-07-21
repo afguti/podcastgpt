@@ -150,7 +150,6 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	    content = file.read()
 	polly = f"<speak>\n{content}\n</speak>"
 	save_output("forpolly", polly)
-
 			
 def main():
 	if len(sys.argv) < 3:	
