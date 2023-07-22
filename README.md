@@ -14,6 +14,19 @@ The repository includes four main scripts:
 
 4. `tokencount.py`: This script contains a function to count the number of tokens in a given text, which is used in other scripts for token tracking.
 
+5. `speech.py`: Text to speech script. 
+    Notes: IAM identity has to be created and in Permissions policies "AmazonPollyFullAccess" as well as "AmazonS3FullAccess" has to be added.
+    Sample of command:
+    tts(engine="neural", region='ap-northeast-1', endpoint_url='https://polly.ap-northeast-1.amazonaws.com/', output_format='mp3', bucket_name='podcast-wellness-e1', s3_key_prefix='prueba', voice_id='Ruth', text_file_path='./wellness3')
+    Source:
+    https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
+    https://docs.aws.amazon.com/polly/latest/dg/API_StartSpeechSynthesisTask.html
+    https://stackoverflow.com/questions/50100221/download-file-from-aws-s3-using-python
+    https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-example-download-file.html
+    https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/polly/client/start_speech_synthesis_task.html#Polly.Client.start_speech_synthesis_task
+    https://stackoverflow.com/questions/73533742/start-speech-synthesis-task-to-mp3-amazon-polly?rq=1
+
+
 ## Usage
 To use the scripts and generate an episode script, follow these steps:
 
