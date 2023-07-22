@@ -21,15 +21,6 @@ bucket_name='podcast-wellness-e1', s3_key_prefix='prueba', voice_id='Ruth', text
     )
     return response['SynthesisTask']['TaskId'] 
 
-#pending: How to define the language?
-#region = 'ap-northeast-1'
-#endpoint_url = 'https://polly.ap-northeast-1.amazonaws.com/'
-#output_format = 'mp3'
-#bucket_name = 'podcast-wellness-e1' #a bucket was created manually. This can be automated
-#s3_key_prefix = 'prueba' #This is a folder inside the bucket
-#voice_id = 'Joanna'
-#text_file_path = './input.txt' #The input in the current directory
-
 def check_task_status(region, task_id):
     # Create a Boto3 client for Polly
     polly_client = boto3.client('polly', region_name=region)
