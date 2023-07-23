@@ -3,7 +3,7 @@ import sys
 import openai
 import tiktoken
 from mutagen.mp3 import MP3 #pip install mutagen
-from pydub import AudioSegment #for mp3 manipulation. pip install pydub
+from pydub import AudioSegment, silence #for mp3 manipulation. pip install pydub
 
 #my scripts
 from web_scrapt import curate
@@ -114,8 +114,8 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	] 
 	response, token_dict = get_completion_and_token_count(messages, temperature=0)
 	
-	save_output("raw_p1.txt", response) #for test purpose
-	resp1_1 = remove_text(response,0,2,0)  #Part1 for bsoundprompt
+	save_output("raw.txt", response) #for test purpose
+	resp1_1 = remove_text(response,0,0,0)  #Part1 for bsoundprompt
 	save_output("resp1_1.txt", resp1_1)
 	prGreenIn("\nNOW REVIEW THE OUTPUT OF PART 1 IN resp1_1.txt AND PRESS ENTER TO CONTINUE")
 	with open('resp1_1.txt', 'r') as file:
@@ -142,9 +142,10 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	background1 = background1 - 22
 	background1 = background1 * (int(audio_lenght)+1)
 	background1 = background1[0:audio_lenght*1000]
+	faded_sound = background1.fade_out(3000) #Fade out the background audio the last 3 seconds
 	talk = AudioSegment.from_file("./part1.mp3", format="mp3")
 	talk = talk + 8
-	overlay1 = background1.overlay(talk, position=3000)
+	overlay1 = faded_sound.overlay(talk, position=3000)
 	file_handle = overlay1.export('final_p1.mp3', format='mp3')
 	prRed("\nPART 1 IS COMPLETED!")
 
@@ -152,46 +153,158 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	url_string = search(entra)
 	if len(url_string) == 0:
 	    sys.exit("SOMETHING WENT WRONG WITH THE SEARCH FOR TEXT")
-	url = url_string[0]['href']
+	prRed("\nCheck the articles and chose a good one:")
+	for i in range(len(url_string)):
+		print(f"URL[{i}]: {url_string[i]['href']}")
+	art = input("\nSELECT AN ARTICLE: ")
+	art = int(art)
+	url = url_string[art]['href']
 	print("Section 2 web article: "+url)
 	intro = "Now in this section of the podcast we will review information we found in a web site."
 	part2 = curate(url, entra, intro)
-	save_output("tocompare", part2) #for test purpose
+	save_output("raw.txt", part2) #for test purpose
 	if len(part2) < 100:
 	    print("Something went wrong. Check output file!")
 	else:
 	    print("All seems good!")
-	    part2 = remove_text(part2,1,2) #Part2
-	save_output("wellness3", part2)
+	    part2 = remove_text(part2,0,0,0) #Part2	
+	save_output("resp2_1.txt", part2)
+	prGreenIn("\nNOW REVIEW THE OUTPUT OF PART 2 IN resp2_1.txt AND PRESS ENTER TO CONTINUE")
+
+	with open('resp2_1.txt', 'r') as file:
+		content = file.read()
+	resp2_2 = remove_text(content,0,0,1) #Part2 for tts
+	resp2_2 = '<speak>\n'+resp2_2+'\n</speak>'
+	save_output("resp2_2.txt", resp2_2) #Part2 for tts
+	prGreenIn("\nREVIEW resp2_2.txt FOR tts AND PRESS ENTER TO CONTINUE")
+	tts(engine="neural", region='ap-northeast-1', endpoint_url='https://polly.ap-northeast-1.amazonaws.com/', output_format='mp3', 
+	bucket_name='podcast-wellness-e1', s3_key_prefix='prueba', voice_id='Ruth', text_file_path='./resp2_2.txt', output_path='./part2.mp3')
+	audio = MP3("part2.mp3")
+	audio_lenght=int(audio.info.length)+6
+	prRed(f'\naudio lenght for Part2: {audio_lenght} seconds\n')
+	prompt1 = prompt(content)
+	lines = prompt1.split('\n')
+	last_line = lines[-1].strip()
+	prRed('\nPrompt to generate Part2 background sound: ')
+	print(last_line+"\n")
+	#we use the Colab from https://github.com/facebookresearch/audiocraft to generate background audio
+	prGreenIn("\nNOW BASED ON THE PROMPT ABOVE, GENERATE BACKGROUND SOUND, NAME IT background2.mp4, AND PRESS ENTER TO CONTINUE") #Need to automate this part
+	background1 = AudioSegment.from_file("./background2.mp4", format="mp4")
+	background1 = background1 - 22
+	background1 = background1 * (int(audio_lenght)+1)
+	background1 = background1[0:audio_lenght*1000]
+	faded_sound = background1.fade_out(3000)
+	talk = AudioSegment.from_file("./part2.mp3", format="mp3")
+	talk = talk + 8
+	overlay1 = faded_sound.overlay(talk, position=3000)
+	file_handle = overlay1.export('final_p2.mp3', format='mp3')
+	prRed("\nPART 2 IS COMPLETED!")
 
     #Section 3 will pick up a news article
 	url_string = search(entra, 'news')
 	if len(url_string) == 0:
 	    sys.exit("SOMETHING WENT WRONG WITH THE SEARCH FOR NEWS")
-	url = url_string[0]['url']
+	prRed("\nCheck the news articles and chose a good one:")
+	for i in range(len(url_string)):
+		print(f"URL[{i}]: {url_string[i]['url']}")
+	art = input("\nSELECT A NEWS ARTICLE: ")
+	art = int(art)
+	url = url_string[art]['url']
 	print("Section 3 news article: "+url)
 	intro1 = f"Now in this section of the podcast we will review the news about {entra}"
 	part3 = curate(url, entra, intro1)
-	save_output("tocompare", part3) #for test purpose
+	save_output("raw.txt", part3) #for test purpose
 	if len(part3) < 100:
 	    print("Something went wrong. Check output file!")
 	else:
 	    print("All seems good!")
-	    part3 = remove_text(part3,1,2) #Part3
-	save_output("wellness3", part3)
-
+	    part3 = remove_text(part3,0,0,0) #Part3
+	save_output("resp3_1.txt", part3)
+	prGreenIn("\nNOW REVIEW THE OUTPUT OF PART 3 IN resp3_1.txt AND PRESS ENTER TO CONTINUE")
+#SE REPITE
+	with open('resp3_1.txt', 'r') as file:
+		content = file.read()
+	resp3_2 = remove_text(content,0,0,1) #Part3 for tts
+	resp3_2 = '<speak>\n'+resp3_2+'\n</speak>'
+	save_output("resp3_2.txt", resp3_2) #Part3 for tts
+	prGreenIn("\nREVIEW resp3_2.txt FOR tts AND PRESS ENTER TO CONTINUE")
+	tts(engine="neural", region='ap-northeast-1', endpoint_url='https://polly.ap-northeast-1.amazonaws.com/', output_format='mp3', 
+	bucket_name='podcast-wellness-e1', s3_key_prefix='prueba', voice_id='Ruth', text_file_path='./resp3_2.txt', output_path='./part3.mp3')
+	audio = MP3("part3.mp3")
+	audio_lenght=int(audio.info.length)+6
+	prRed(f'\naudio lenght for Part3: {audio_lenght} seconds\n')
+	prompt1 = prompt(content)
+	lines = prompt1.split('\n')
+	last_line = lines[-1].strip()
+	prRed('\nPrompt to generate Part3 background sound: ')
+	print(last_line+"\n")
+	#we use the Colab from https://github.com/facebookresearch/audiocraft to generate background audio
+	prGreenIn("\nNOW BASED ON THE PROMPT ABOVE, GENERATE BACKGROUND SOUND, NAME IT background3.mp4, AND PRESS ENTER TO CONTINUE") #Need to automate this part
+	background1 = AudioSegment.from_file("./background3.mp4", format="mp4")
+	background1 = background1 - 22
+	background1 = background1 * (int(audio_lenght)+1)
+	background1 = background1[0:audio_lenght*1000]
+	faded_sound = background1.fade_out(3000)
+	talk = AudioSegment.from_file("./part3.mp3", format="mp3")
+	talk = talk + 8
+	overlay1 = faded_sound.overlay(talk, position=3000)
+	file_handle = overlay1.export('final_p3.mp3', format='mp3')
+	prRed("\nPART 3 IS COMPLETED!")
+#HASTA AQUI
 	#Summary:
-	path = "./wellness3"
-	with open(path, 'r') as file:
-	    content = file.read()
-	part4 = outtro(content, next_ep) #here we need to input the topic of the next episode
-	save_output("tocompare", part4) #for text purpose
-	part4 = remove_text(part4,0,0)    
-	save_output("wellness3", part4)
-	with open(path, 'r') as file:
-	    content = file.read()
-	polly = f"<speak>\n{content}\n</speak>"
-	save_output("forpolly", polly)
+	summ = ''
+	for i in range(3):
+		path = f'./resp{i+1}_1.txt'
+		with open(path, 'r') as file:
+			content = file.read()
+		summ += content
+	part4 = outtro(summ, next_ep) #here we need to input the topic of the next episode
+	save_output("resp4_1.txt", part4) #for text purpose
+	prGreenIn("\nNOW REVIEW THE OUTPUT OF PART 4 IN resp4_1.txt AND PRESS ENTER TO CONTINUE")
+	with open('./resp4_1.txt', 'r') as file:
+		content = file.read()	
+#SE REPITE
+	with open('resp4_1.txt', 'r') as file:
+		content = file.read()
+	resp4_2 = remove_text(content,0,0,1) #Part4 for tts
+	resp4_2 = '<speak>\n'+resp4_2+'\n</speak>'
+	save_output("resp4_2.txt", resp4_2) #Part4 for tts
+	prGreenIn("\nREVIEW resp4_2.txt FOR tts AND PRESS ENTER TO CONTINUE")
+	tts(engine="neural", region='ap-northeast-1', endpoint_url='https://polly.ap-northeast-1.amazonaws.com/', output_format='mp3', 
+	bucket_name='podcast-wellness-e1', s3_key_prefix='prueba', voice_id='Ruth', text_file_path='./resp4_2.txt', output_path='./part4.mp3')
+	audio = MP3("part4.mp3")
+	audio_lenght=int(audio.info.length)+6
+	prRed(f'\naudio lenght for Part4: {audio_lenght} seconds\n')
+	prompt1 = prompt(content)
+	lines = prompt1.split('\n')
+	last_line = lines[-1].strip()
+	prRed('\nPrompt to generate Part4 background sound: ')
+	print(last_line+"\n")
+	#we use the Colab from https://github.com/facebookresearch/audiocraft to generate background audio
+	prGreenIn("\nNOW BASED ON THE PROMPT ABOVE, GENERATE BACKGROUND SOUND, NAME IT background4.mp4, AND PRESS ENTER TO CONTINUE") #Need to automate this part
+	background1 = AudioSegment.from_file("./background4.mp4", format="mp4")
+	background1 = background1 - 22
+	background1 = background1 * (int(audio_lenght)+1)
+	background1 = background1[0:audio_lenght*1000]
+	faded_sound = background1.fade_out(3000)
+	talk = AudioSegment.from_file("./part4.mp3", format="mp3")
+	talk = talk + 8
+	overlay1 = faded_sound.overlay(talk, position=3000)
+	file_handle = overlay1.export('final_p4.mp3', format='mp3')
+	prRed("\nPART 4 IS COMPLETED. I WILL START TO COMBINE AUDIO.")
+#HASTA AQUI
+	p1 = AudioSegment.from_file("./final_p1.mp3", format="mp3")
+	p2 = AudioSegment.from_file("./final_p2.mp3", format="mp3")
+	p3 = AudioSegment.from_file("./final_p3.mp3", format="mp3")
+	p4 = AudioSegment.from_file("./final_p4.mp3", format="mp3")
+	silence_duration = 3000
+	silence_segment = AudioSegment.silent(duration=silence_duration)
+	combined = p1 + silence_segment + p2 + silence_segment + p3 + silence_segment + p4
+	combined.export(f"./{entra}.mp3", format="mp3")
+	prRed(f"FIND THE FINAL AUDIO IN ./{entra}.mp3 FILE.")
+	
+
+
 			
 def main():
 	if len(sys.argv) < 3:	
