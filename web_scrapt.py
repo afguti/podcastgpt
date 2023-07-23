@@ -13,9 +13,9 @@ _ = load_dotenv(find_dotenv())
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 def get_completion_and_token_count(messages, #Here I can count the number of tokens
-                                   model="gpt-3.5-turbo-0613", 
+                                   model="gpt-3.5-turbo-16k-0613", 
                                    temperature=0, 
-                                   max_tokens=1000):
+                                   max_tokens=4096):
     
     response = openai.ChatCompletion.create(
         model=model,
@@ -62,7 +62,7 @@ def parser(url):
 
 def curate(url, topic, intro):
     tokens, entra = parser(url)
-    if tokens > 2500:
+    if tokens > 4096:
         response = f"CONTENT HAS {tokens}. THEY ARE TOO MANY!"
     else:
         text = f"""Write a script for an episode of a podcast named Your Wellness Journey. The host's name is Veronica, and there are no guests in the podcast. The topic of the episode is {topic}.
