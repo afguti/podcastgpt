@@ -2,11 +2,15 @@
 import sys
 import openai
 import tiktoken
+from mutagen.mp3 import MP3 #pip install mutagen
+from pydub import AudioSegment #for mp3 manipulation. pip install pydub
 
 #my scripts
 from web_scrapt import curate
 from summary import outtro
 from urlselect import web_search as search
+from speech import tts
+from bsoundprompt import prompt
 
 #lines below are to add api key as an env variable
 import os
@@ -14,10 +18,14 @@ from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv())
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
+#Font colors
+def prRed(skk): print("\033[91m {}\033[00m" .format(skk))
+def prGreenIn(skk): input("\033[92m {}\033[00m" .format(skk))
+
 def get_completion_and_token_count(messages, #Here I can count the number of tokens
-                                   model="gpt-3.5-turbo-0613", 
+                                   model="gpt-3.5-turbo-16k-0613", 
                                    temperature=0, 
-                                   max_tokens=1000):
+                                   max_tokens=4096):
     
     response = openai.ChatCompletion.create(
         model=model,
@@ -37,7 +45,7 @@ def get_completion_and_token_count(messages, #Here I can count the number of tok
     return content, token_dict
 
 #n is the number of lines to remove from the top, and m is the number of lines to remove from bottom.
-def remove_text(text,n: int,m: int):
+def remove_text(text,n: int,m: int, ts=1):
     # Remove "VERONICA: or Veronica: "
     text = text.replace("VERONICA: ", "")
     text = text.replace("Veronica: ", "")
@@ -53,9 +61,13 @@ def remove_text(text,n: int,m: int):
         # Remove the first n lines, and last m lines
         lines = text.split('\n')
         text = '\n'.join(lines[n:-m])
+
+    # Remove empty lines
+    text = "\n".join(line for line in text.split("\n") if line.strip())
     
     #Replace \n with ". "
-    text = text.replace('\n', '\n<break time="500ms"/>\n')
+    if ts == 1:
+        text = text.replace('\n', '\n<break time="500ms"/>\n')
     
     return text
 
@@ -102,10 +114,40 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	] 
 	response, token_dict = get_completion_and_token_count(messages, temperature=0)
 	
-	save_output("tocompare", response) #for test purpose
-	response = remove_text(response,0,2)  #Part1
-	save_output("wellness3", response)
-	
+	save_output("raw_p1.txt", response) #for test purpose
+	resp1_1 = remove_text(response,0,2,0)  #Part1 for bsoundprompt
+	save_output("resp1_1.txt", resp1_1)
+	prGreenIn("\nNOW REVIEW THE OUTPUT OF PART 1 IN resp1_1.txt AND PRESS ENTER TO CONTINUE")
+	with open('resp1_1.txt', 'r') as file:
+		content = file.read()
+	resp1_2 = remove_text(content,0,0,1) #Part1 for tts
+	resp1_2 = '<speak>\n'+resp1_2+'\n</speak>'
+	save_output("resp1_2.txt", resp1_2) #Part1 for tts
+	prGreenIn("\nREVIEW resp1_2.txt FOR tts AND PRESS ENTER TO CONTINUE")
+	tts(engine="neural", region='ap-northeast-1', endpoint_url='https://polly.ap-northeast-1.amazonaws.com/', output_format='mp3', 
+	bucket_name='podcast-wellness-e1', s3_key_prefix='prueba', voice_id='Ruth', text_file_path='./resp1_2.txt', output_path='./part1.mp3')
+	audio = MP3("part1.mp3")
+	audio_lenght=int(audio.info.length)+6
+	prRed(f'\naudio lenght for Part1: {audio_lenght} seconds\n')
+	#with open('resp1_1.txt', 'r') as file:
+	#	content = file.read()
+	prompt1 = prompt(content)
+	lines = prompt1.split('\n')
+	last_line = lines[-1].strip()
+	prRed('\nPrompt to generate Part1 background sound: ')
+	print(last_line+"\n")
+	#we use the Colab from https://github.com/facebookresearch/audiocraft to generate background audio
+	prGreenIn("\nNOW BASED ON THE PROMPT ABOVE, GENERATE BACKGROUND SOUND, NAME IT background1.mp4, AND PRESS ENTER TO CONTINUE") #Need to automate this part
+	background1 = AudioSegment.from_file("./background1.mp4", format="mp4")
+	background1 = background1 - 22
+	background1 = background1 * (int(audio_lenght)+1)
+	background1 = background1[0:audio_lenght*1000]
+	talk = AudioSegment.from_file("./part1.mp3", format="mp3")
+	talk = talk + 8
+	overlay1 = background1.overlay(talk, position=3000)
+	file_handle = overlay1.export('final_p1.mp3', format='mp3')
+	prRed("\nPART 1 IS COMPLETED!")
+
 	#Section 2 picks up any website related to the topic
 	url_string = search(entra)
 	if len(url_string) == 0:
