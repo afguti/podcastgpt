@@ -5,7 +5,7 @@ import time
 
 DUCKDUCKGO_MAX_ATTEMPTS = 3 
 
-def web_search(query: str, browse: str = 'text', num_results: int = 8) -> str:
+def web_search(query: str, browse: str = 'text', num_results: int = 20) -> str:
     search_results = []
     attempts = 0
     url_key = 'href'
@@ -23,7 +23,7 @@ def web_search(query: str, browse: str = 'text', num_results: int = 8) -> str:
         time.sleep(1)
         attempts += 1
     result = content_count(search_results, url_key)  # <-- HERE IS THE ISSUE
-    filtered = [i for i in result if i['size'] < 2501 and i['size'] > 2000]
+    filtered = [i for i in result if i['size'] < 3001 and i['size'] > 2000]
     if len(filtered) == 0 and num_results < 100:
         num_results = num_results * 2
         time.sleep(1)
