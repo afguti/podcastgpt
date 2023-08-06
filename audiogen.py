@@ -24,7 +24,7 @@ def audio(resp: str, ch: int):
 	prRed(f'\naudio lenght for Part{ch}: {audio_lenght} seconds\n')
 	prompt1 = prompt(content)
 	lines = prompt1.split('\n')
-	last_two = lines[-2:]
+	last_two = lines[-3:]
 	last_lines = "\n".join(last_two)
 	prRed(f'\nPrompt to generate Part{ch} background sound: ')
 	print(last_lines+"\n")
