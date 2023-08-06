@@ -24,7 +24,7 @@ def audio(resp: str, ch: int):
 	prRed(f'\naudio lenght for Part{ch}: {audio_lenght} seconds\n')
 	prompt1 = prompt(content)
 	lines = prompt1.split('\n')
-	last_two = lines[-3:]
+	last_two = lines[-3:] #How many lines of the prompt for background audio we will generate
 	last_lines = "\n".join(last_two)
 	prRed(f'\nPrompt to generate Part{ch} background sound: ')
 	print(last_lines+"\n")
@@ -36,7 +36,7 @@ def audio(resp: str, ch: int):
 	backg = backg[0:audio_lenght*1000]
 	faded_sound = backg.fade_out(3000) #Fade out the background audio the last 3 seconds
 	talk = AudioSegment.from_file(f"./part{ch}.mp3", format="mp3")
-	talk = talk + 8
+	talk = talk + 8 #This is the volume of the speech
 	overlay1 = faded_sound.overlay(talk, position=3000)
 	file_handle = overlay1.export(f'final_p{ch}.mp3', format='mp3')
 	prRed(f"\nPART {ch} IS COMPLETED!")
