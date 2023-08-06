@@ -11,6 +11,8 @@ from summary import outtro
 from urlselect import web_search as search
 from speech import tts
 from bsoundprompt import prompt
+from audiogen import audio as gen_audio
+from filehandle import remove_text, save_output
 
 #lines below are to add api key as an env variable
 import os
@@ -45,47 +47,47 @@ def get_completion_and_token_count(messages, #Here I can count the number of tok
     return content, token_dict
 
 #n is the number of lines to remove from the top, and m is the number of lines to remove from bottom.
-def remove_text(text,n: int,m: int, ts=1):
-    # Remove "VERONICA: or Veronica: "
-    text = text.replace("VERONICA: ", "")
-    text = text.replace("Veronica: ", "")
-
-    # Remove words enclosed in []
-    import re
-    text = re.sub(r'\[.*?\]', '', text)
-    
-    # Remove empty lines
-    text = "\n".join(line for line in text.split("\n") if line.strip())
-    
-    if n != 0 or m != 0:
-        # Remove the first n lines, and last m lines
-        lines = text.split('\n')
-        text = '\n'.join(lines[n:-m])
-
-    # Remove empty lines
-    text = "\n".join(line for line in text.split("\n") if line.strip())
-    
-    #Replace \n with ". "
-    if ts == 1:
-        text = text.replace('\n', '\n<break time="500ms"/>\n')
-    
-    return text
+#def remove_text(text,n: int,m: int, ts=1):
+#    # Remove "VERONICA: or Veronica: "
+#    text = text.replace("VERONICA: ", "")
+#    text = text.replace("Veronica: ", "")
+#
+#    # Remove words enclosed in []
+#    import re
+#    text = re.sub(r'\[.*?\]', '', text)
+#    
+#    # Remove empty lines
+#    text = "\n".join(line for line in text.split("\n") if line.strip())
+#    
+#    if n != 0 or m != 0:
+#        # Remove the first n lines, and last m lines
+#        lines = text.split('\n')
+#        text = '\n'.join(lines[n:-m])
+#
+#    # Remove empty lines
+#    text = "\n".join(line for line in text.split("\n") if line.strip())
+#    
+#    #Replace \n with ". "
+#    if ts == 1:
+#        text = text.replace('\n', '\n<break time="500ms"/>\n')
+#    
+#    return text
 
 #Create the file where the output is saved
-def save_output(filename: str, texto: str):
-    directory = './'
-
-    file_path = os.path.join(directory, filename)
-
-    if not os.path.exists(file_path):
-        # File does not exist, create it
-        with open(file_path, 'w') as file:
-            pass  # This creates an empty file
-
-    with open(file_path, 'a') as file:
-        # Append text to the file
-        file.write("\n"+texto)
-    return f"Content saved to {file_path}."
+#def save_output(filename: str, texto: str):
+#    directory = './'
+#
+#    file_path = os.path.join(directory, filename)
+#
+#    if not os.path.exists(file_path):
+#        # File does not exist, create it
+#        with open(file_path, 'w') as file:
+#            pass  # This creates an empty file
+#
+#    with open(file_path, 'a') as file:
+#        # Append text to the file
+#        file.write("\n"+texto)
+#    return f"Content saved to {file_path}."
 
 #It returns Empty when no argument is given to podcastgpt.py
 def default():
@@ -118,36 +120,42 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	resp1_1 = remove_text(response,0,0,0)  #Part1 for bsoundprompt
 	save_output("resp1_1.txt", resp1_1)
 	prGreenIn("\nNOW REVIEW THE OUTPUT OF PART 1 IN resp1_1.txt AND PRESS ENTER TO CONTINUE")
-	with open('resp1_1.txt', 'r') as file:
-		content = file.read()
-	resp1_2 = remove_text(content,0,0,1) #Part1 for tts
-	resp1_2 = '<speak>\n'+resp1_2+'\n</speak>'
-	save_output("resp1_2.txt", resp1_2) #Part1 for tts
-	prGreenIn("\nREVIEW resp1_2.txt FOR tts AND PRESS ENTER TO CONTINUE")
-	tts(engine="neural", region='ap-northeast-1', endpoint_url='https://polly.ap-northeast-1.amazonaws.com/', output_format='mp3', 
-	bucket_name='podcast-wellness-e1', s3_key_prefix='prueba', voice_id='Ruth', text_file_path='./resp1_2.txt', output_path='./part1.mp3')
-	audio = MP3("part1.mp3")
-	audio_lenght=int(audio.info.length)+6
-	prRed(f'\naudio lenght for Part1: {audio_lenght} seconds\n')
+	
+	gen_audio("resp1_1.txt", 1)
+
 	#with open('resp1_1.txt', 'r') as file:
 	#	content = file.read()
-	prompt1 = prompt(content)
-	lines = prompt1.split('\n')
-	last_line = lines[-1].strip()
-	prRed('\nPrompt to generate Part1 background sound: ')
-	print(last_line+"\n")
-	#we use the Colab from https://github.com/facebookresearch/audiocraft to generate background audio
-	prGreenIn("\nNOW BASED ON THE PROMPT ABOVE, GENERATE BACKGROUND SOUND, NAME IT background1.mp4, AND PRESS ENTER TO CONTINUE") #Need to automate this part
-	background1 = AudioSegment.from_file("./background1.mp4", format="mp4")
-	background1 = background1 - 22
-	background1 = background1 * (int(audio_lenght)+1)
-	background1 = background1[0:audio_lenght*1000]
-	faded_sound = background1.fade_out(3000) #Fade out the background audio the last 3 seconds
-	talk = AudioSegment.from_file("./part1.mp3", format="mp3")
-	talk = talk + 8
-	overlay1 = faded_sound.overlay(talk, position=3000)
-	file_handle = overlay1.export('final_p1.mp3', format='mp3')
-	prRed("\nPART 1 IS COMPLETED!")
+	#resp1_2 = remove_text(content,0,0,1) #Part1 for tts
+	#resp1_2 = '<speak>\n'+resp1_2+'\n</speak>'
+	#save_output("resp1_2.txt", resp1_2) #Part1 for tts
+	#prGreenIn("\nREVIEW resp1_2.txt FOR tts AND PRESS ENTER TO CONTINUE")
+	#tts(engine="neural", region='ap-northeast-1', endpoint_url='https://polly.ap-northeast-1.amazonaws.com/', output_format='mp3', 
+	#bucket_name='podcast-wellness-e1', s3_key_prefix='prueba', voice_id='Ruth', text_file_path='./resp1_2.txt', output_path='./part1.mp3')
+	#audio = MP3("part1.mp3")
+	#audio_lenght=int(audio.info.length)+6
+	#prRed(f'\naudio lenght for Part1: {audio_lenght} seconds\n')
+	##with open('resp1_1.txt', 'r') as file:
+	##	content = file.read()
+	#prompt1 = prompt(content)
+	#lines = prompt1.split('\n')
+	#last_two = lines[-2:]
+	#last_lines = "\n".join(last_two)
+	##last_line = lines[-1].strip()
+	#prRed('\nPrompt to generate Part2 background sound: ')
+	#print(last_lines+"\n")
+	##print(last_line+"\n")
+	##we use the Colab from https://github.com/facebookresearch/audiocraft to generate background audio
+	#prGreenIn("\nNOW BASED ON THE PROMPT ABOVE, GENERATE BACKGROUND SOUND, NAME IT background1.mp4, AND PRESS ENTER TO CONTINUE") #Need to automate this part
+	#background1 = AudioSegment.from_file("./background1.mp4", format="mp4")
+	#background1 = background1 - 20
+	#background1 = background1 * (int(audio_lenght)+1)
+	#background1 = background1[0:audio_lenght*1000]
+	#faded_sound = background1.fade_out(3000) #Fade out the background audio the last 3 seconds
+	#talk = AudioSegment.from_file("./part1.mp3", format="mp3")
+	#talk = talk + 8
+	#overlay1 = faded_sound.overlay(talk, position=3000)
+	#file_handle = overlay1.export('final_p1.mp3', format='mp3')
+	#prRed("\nPART 1 IS COMPLETED!")
 
 	#Section 2 picks up any website related to the topic
 	url_string = search(entra)
@@ -184,13 +192,16 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	prRed(f'\naudio lenght for Part2: {audio_lenght} seconds\n')
 	prompt1 = prompt(content)
 	lines = prompt1.split('\n')
-	last_line = lines[-1].strip()
+	last_two = lines[-2:]
+	last_lines = "\n".join(last_two)
+	#last_line = lines[-1].strip()
 	prRed('\nPrompt to generate Part2 background sound: ')
-	print(last_line+"\n")
+	print(last_lines+"\n")
+	#print(last_line+"\n")
 	#we use the Colab from https://github.com/facebookresearch/audiocraft to generate background audio
 	prGreenIn("\nNOW BASED ON THE PROMPT ABOVE, GENERATE BACKGROUND SOUND, NAME IT background2.mp4, AND PRESS ENTER TO CONTINUE") #Need to automate this part
 	background1 = AudioSegment.from_file("./background2.mp4", format="mp4")
-	background1 = background1 - 22
+	background1 = background1 - 20
 	background1 = background1 * (int(audio_lenght)+1)
 	background1 = background1[0:audio_lenght*1000]
 	faded_sound = background1.fade_out(3000)
@@ -235,13 +246,16 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	prRed(f'\naudio lenght for Part3: {audio_lenght} seconds\n')
 	prompt1 = prompt(content)
 	lines = prompt1.split('\n')
-	last_line = lines[-1].strip()
-	prRed('\nPrompt to generate Part3 background sound: ')
-	print(last_line+"\n")
+	last_two = lines[-2:]
+	last_lines = "\n".join(last_two)
+	#last_line = lines[-1].strip()
+	prRed('\nPrompt to generate Part2 background sound: ')
+	print(last_lines+"\n")
+	#print(last_line+"\n")
 	#we use the Colab from https://github.com/facebookresearch/audiocraft to generate background audio
 	prGreenIn("\nNOW BASED ON THE PROMPT ABOVE, GENERATE BACKGROUND SOUND, NAME IT background3.mp4, AND PRESS ENTER TO CONTINUE") #Need to automate this part
 	background1 = AudioSegment.from_file("./background3.mp4", format="mp4")
-	background1 = background1 - 22
+	background1 = background1 - 20
 	background1 = background1 * (int(audio_lenght)+1)
 	background1 = background1[0:audio_lenght*1000]
 	faded_sound = background1.fade_out(3000)
@@ -277,13 +291,16 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	prRed(f'\naudio lenght for Part4: {audio_lenght} seconds\n')
 	prompt1 = prompt(content)
 	lines = prompt1.split('\n')
-	last_line = lines[-1].strip()
-	prRed('\nPrompt to generate Part4 background sound: ')
-	print(last_line+"\n")
+	last_two = lines[-2:]
+	last_lines = "\n".join(last_two)
+	#last_line = lines[-1].strip()
+	prRed('\nPrompt to generate Part2 background sound: ')
+	print(last_lines+"\n")
+	#print(last_line+"\n")
 	#we use the Colab from https://github.com/facebookresearch/audiocraft to generate background audio
 	prGreenIn("\nNOW BASED ON THE PROMPT ABOVE, GENERATE BACKGROUND SOUND, NAME IT background4.mp4, AND PRESS ENTER TO CONTINUE") #Need to automate this part
 	background1 = AudioSegment.from_file("./background4.mp4", format="mp4")
-	background1 = background1 - 22
+	background1 = background1 - 20
 	background1 = background1 * (int(audio_lenght)+1)
 	background1 = background1[0:audio_lenght*1000]
 	faded_sound = background1.fade_out(3000)
@@ -302,9 +319,6 @@ Write a script for the Introduction and Part 1. The content should be around 500
 	combined = p1 + silence_segment + p2 + silence_segment + p3 + silence_segment + p4
 	combined.export(f"./{entra}.mp3", format="mp3")
 	prRed(f"FIND THE FINAL AUDIO IN ./{entra}.mp3 FILE.")
-	
-
-
 			
 def main():
 	if len(sys.argv) < 3:	
