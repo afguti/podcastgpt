@@ -77,16 +77,20 @@ Part 1 (Around 500 words):
 - Discuss key points, insights, or strategies related to {topic}.
 - Encourage listeners to engage with the content and apply it to their own lives.
 
-Part 2 (Around 500 words):
+PART 2 (Around 500 words):
 - Start Part2 following this example: {intro}
 - Mention the website {url} in a concise and reader-friendly way at the beginning. Avoid writting the full url: {url}.
 - Mention that the link to the website can be found in the description of the episode.
 - Extract and present the main ideas from ```{entra}```.
 - Provide a one sententence mention about Part 3.
 
-Write a script for the Part 2 that is a continuation of Part 1. The content should be around 500 words. Remove any last paragraphs that attempt to finish the script.
+WRITE PART 2 OF THE SCRIPT THAT IS A CONTINUATION OF Part 1. The content MUST BE MORE THAN 500 words. Remove any last paragraphs that attempt to finish the script.
 Avoid using any sentence that implies welcoming the listener back or expressing pleasure in their return.
         """
+
+#Write a script for the Part 2 that is a continuation of Part 1. The content should be around 500 words. Remove any last paragraphs that attempt to finish the script.
+#Avoid using any sentence that implies welcoming the listener back or expressing pleasure in their return.
+
         messages = [
             {'role': 'system',
              'content': "You are a content curation assistant."},
