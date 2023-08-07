@@ -41,5 +41,5 @@ def save_output(filename: str, texto: str):
 
     with open(file_path, 'a') as file:
         # Append text to the file
-        file.write("\n"+texto)
+        file.write(texto)
     return f"Content saved to {file_path}."
