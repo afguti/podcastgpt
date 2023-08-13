@@ -23,7 +23,7 @@ def web_search(query: str, browse: str = 'text', num_results: int = 20) -> str:
         time.sleep(1)
         attempts += 1
     result = content_count(search_results, url_key)  # <-- HERE IS THE ISSUE
-    filtered = [i for i in result if i['size'] < 3001 and i['size'] > 2000]
+    filtered = [i for i in result if i['size'] < 3501 and i['size'] > 1500]
     if len(filtered) == 0 and num_results < 100:
         num_results = num_results * 2
         time.sleep(1)
