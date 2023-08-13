@@ -13,6 +13,7 @@ from speech import tts
 from bsoundprompt import prompt
 from audiogen import audio as gen_audio
 from filehandle import remove_text, save_output
+from description import descr
 
 #lines below are to add api key as an env variable
 import os
@@ -83,6 +84,7 @@ def execute():
 		print("\nPart 1 is already completed.")
 
 	#Section 2 picks up any website related to the topic
+	url1 = ''
 	if not(os.path.exists('./final_p2.mp3')): 
 		url_string = search(entra)
 		if len(url_string) == 0:
@@ -92,10 +94,10 @@ def execute():
 			print(f"URL[{i}]: {url_string[i]['href']}")
 		art = input("\nSELECT AN ARTICLE: ")
 		art = int(art)
-		url = url_string[art]['href']
-		print("Section 2 web article: "+url)
+		url1 = url_string[art]['href']
+		print("Section 2 web article: "+url1)
 		intro = "Now in this section of the podcast we will review information we found in a web site."
-		part2 = curate(url, entra, intro)
+		part2 = curate(url1, entra, intro)
 		save_output("raw.txt", part2) #for test purpose
 		if len(part2) < 100:
 		    print("Something went wrong. Check output file!")
@@ -109,6 +111,7 @@ def execute():
 		print("\nPart 2 is already completed.")
 
     #Section 3 will pick up a news article
+	url2 = ''
 	if not(os.path.exists('./final_p3.mp3')): 
 		url_string = search(entra, 'news')
 		if len(url_string) == 0:
@@ -118,10 +121,10 @@ def execute():
 			print(f"URL[{i}]: {url_string[i]['url']}")
 		art = input("\nSELECT A NEWS ARTICLE: ")
 		art = int(art)
-		url = url_string[art]['url']
-		print("Section 3 news article: "+url)
+		url2 = url_string[art]['url']
+		print("Section 3 news article: "+url2)
 		intro1 = f"Now in this section of the podcast we will review the news about {entra}"
-		part3 = curate(url, entra, intro1)
+		part3 = curate(url2, entra, intro1)
 		save_output("raw.txt", part3) #for test purpose
 		if len(part3) < 100:
 		    print("Something went wrong. Check output file!")
@@ -135,19 +138,41 @@ def execute():
 		print("\nPart 3 is already completed.")
 
 	#Summary:
-	summ = ''
+	if not(os.path.exists('./final_p4.mp3')):
+		summ = ''
+		for i in range(3):
+			path = f'./resp{i+1}_1.txt'
+			with open(path, 'r') as file:
+				content = file.read()
+			summ += content
+		part4 = outtro(summ, next_ep) #here we need to input the topic of the next episode
+		save_output("resp4_1.txt", part4) #for text purpose
+		prGreenIn("\nNOW REVIEW THE OUTPUT OF PART 4 IN resp4_1.txt AND PRESS ENTER TO CONTINUE")
+		with open('./resp4_1.txt', 'r') as file:
+			content = file.read()	
+		gen_audio("resp4_1.txt", 4)
+	else:
+		print("\nPart 4 is already completed.")	
+
+	#Description
+	descrip = ''
 	for i in range(3):
 		path = f'./resp{i+1}_1.txt'
 		with open(path, 'r') as file:
 			content = file.read()
-		summ += content
-	part4 = outtro(summ, next_ep) #here we need to input the topic of the next episode
-	save_output("resp4_1.txt", part4) #for text purpose
-	prGreenIn("\nNOW REVIEW THE OUTPUT OF PART 4 IN resp4_1.txt AND PRESS ENTER TO CONTINUE")
-	with open('./resp4_1.txt', 'r') as file:
+		descrip += content
+	if url1 == '':
+		url1 = prGreenIn("URL1: ")
+	if url2 == '':
+		url2 = prGreenIn("URL2: ")
+	present = descr(descrip, url1, url2) #here we need to input the topic of the next episode
+	print(f'\n{present}')
+	save_output("description.txt", present) #for text purpose
+	prGreenIn("\nNOW REVIEW description.txt AND PRESS ENTER TO CONTINUE")
+	with open('./description.txt', 'r') as file:
 		content = file.read()	
-	gen_audio("resp4_1.txt", 4)
 
+	#compiling the audio
 	p1 = AudioSegment.from_file("./final_p1.mp3", format="mp3")
 	p2 = AudioSegment.from_file("./final_p2.mp3", format="mp3")
 	p3 = AudioSegment.from_file("./final_p3.mp3", format="mp3")
